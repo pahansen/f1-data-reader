@@ -1,15 +1,16 @@
-use binrw::binrw;
+use binrw::BinRead;
 
-#[binrw]
-struct PacketHeader {
-    m_packetFormat: u16,
-    m_gameMajorVersion: u8,
-    m_gameMinorVersion: u8,
-    m_packetVersion: u8,
-    m_packetId: u8,
-    m_sessionUID: u64,
-    m_sessionTime: f64,
-    m_frameIdentifier: u32,
-    m_playerCarIndex: u8,
-    m_secondaryPlayerCarIndex: u8,
+#[derive(Debug, BinRead)]
+#[br(little)]
+pub struct PacketHeader {
+    pub m_packet_format: u16,
+    pub m_game_major_version: u8,
+    pub m_game_minor_version: u8,
+    pub m_packet_version: u8,
+    pub m_packet_id: u8,
+    pub m_session_uid: u64,
+    pub m_session_time: f32,
+    pub m_frame_identifier: u32,
+    pub m_player_car_index: u8,
+    pub m_secondary_player_car_index: u8,
 }

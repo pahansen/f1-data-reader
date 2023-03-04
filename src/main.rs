@@ -14,53 +14,14 @@
 //     }
 // }
 
-// use binrw::BinRead;
-
-// #[derive(BinRead)]
-// #[br(little)]
-// struct PacketHeader {
-//     m_packet_format: u16,
-//     m_game_major_version: u8,
-//     m_game_minor_version: u8,
-//     m_packet_version: u8,
-//     m_packet_id: u8,
-//     m_session_uid: u64,
-//     m_session_time: f64,
-//     m_frame_identifier: u32,
-//     m_player_car_index: u8,
-//     m_secondaryPlayerCarIndex: u8,
-// }
-
-// fn main() -> std::io::Result<()> {
-//     let mut file = std::fs::File::open("/workspaces/f1-data-reader/f1_logs/foo1.bin")?;
-
-//     loop {
-//         // Read a single UDP message from the file
-//         let message = PacketHeader::read(&mut file);
-
-//         // Print the ID, flag, and value of the message
-//         println!("{}", message.m_packet_format);
-//     }
-// }
-
-use std::io::Seek;
-
-use binrw::BinRead;
-
-#[derive(Debug, BinRead)]
-#[br(little)]
-struct PacketHeader {
-    m_packet_format: u16,
-    m_game_major_version: u8,
-    m_game_minor_version: u8,
-    m_packet_version: u8,
-    m_packet_id: u8,
-    m_session_uid: u64,
-    m_session_time: f32,
-    m_frame_identifier: u32,
-    m_player_car_index: u8,
-    m_secondaryPlayerCarIndex: u8,
+mod structs {
+    pub mod packet_header;
+    pub mod packet_car_telemetry_data;
 }
+use std::io::Seek;
+use binrw::BinRead;
+use structs::packet_header::PacketHeader;
+use structs::packet_car_telemetry_data::PacketCarTelemetryData;
 
 fn main() -> std::io::Result<()> {
     let mut file = std::fs::File::open("/workspaces/f1-data-reader/f1logs/foo1.bin")?;
@@ -77,7 +38,8 @@ fn main() -> std::io::Result<()> {
             3 => file.seek(std::io::SeekFrom::Current(16))?,
             4 => file.seek(std::io::SeekFrom::Current(1233))?,
             5 => file.seek(std::io::SeekFrom::Current(1078))?,
-            6 => file.seek(std::io::SeekFrom::Current(1323))?,
+            //6 => file.seek(std::io::SeekFrom::Current(1323))?,
+            6 => print_car_telemetry(&file),
             7 => file.seek(std::io::SeekFrom::Current(1034))?,
             8 => file.seek(std::io::SeekFrom::Current(991))?,
             9 => file.seek(std::io::SeekFrom::Current(1167))?,
@@ -88,4 +50,12 @@ fn main() -> std::io::Result<()> {
         };
     }
     Ok(())
+}
+
+fn print_car_telemetry(mut file: &std::fs::File) -> u64 {
+    let message = PacketCarTelemetryData::read(&mut file);
+    println!(
+        "Test"
+    );
+    1
 }
