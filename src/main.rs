@@ -43,6 +43,8 @@
 //     }
 // }
 
+use std::io::Seek;
+
 use binrw::BinRead;
 
 #[derive(Debug, BinRead)]
@@ -54,27 +56,36 @@ struct PacketHeader {
     m_packet_version: u8,
     m_packet_id: u8,
     m_session_uid: u64,
-    m_session_time: f64,
+    m_session_time: f32,
     m_frame_identifier: u32,
     m_player_car_index: u8,
     m_secondaryPlayerCarIndex: u8,
 }
 
 fn main() -> std::io::Result<()> {
-    let mut file = std::fs::File::open("/workspaces/f1-data-reader/f1_logs/foo1.bin")?;
+    let mut file = std::fs::File::open("/workspaces/f1-data-reader/f1logs/foo1.bin")?;
+    while let Ok(message) = PacketHeader::read(&mut file) {
+        println!(
+            "packet_id: {}, session_uid: {}",
+            message.m_packet_id, message.m_session_uid
+        );
+        // Skip messages that are not implemented
+        match message.m_packet_id {
+            0 => file.seek(std::io::SeekFrom::Current(1440))?,
+            1 => file.seek(std::io::SeekFrom::Current(608))?,
+            2 => file.seek(std::io::SeekFrom::Current(948))?,
+            3 => file.seek(std::io::SeekFrom::Current(16))?,
+            4 => file.seek(std::io::SeekFrom::Current(1233))?,
+            5 => file.seek(std::io::SeekFrom::Current(1078))?,
+            6 => file.seek(std::io::SeekFrom::Current(1323))?,
+            7 => file.seek(std::io::SeekFrom::Current(1034))?,
+            8 => file.seek(std::io::SeekFrom::Current(991))?,
+            9 => file.seek(std::io::SeekFrom::Current(1167))?,
+            10 => file.seek(std::io::SeekFrom::Current(924))?,
+            11 => file.seek(std::io::SeekFrom::Current(1131))?,
 
-    loop {
-        match PacketHeader::read(&mut file) {
-            Ok(message) => {
-                // Print the ID, flag, and value of the message
-                println!(
-                    "packet_id: {}, session_uid: {}",
-                    message.m_packet_id, message.m_session_uid
-                );
-            }
-            Err(e) => {
-                eprintln!("Error reading message: {}", e);
-            }
-        }
+            _ => 0, // Do nothing
+        };
     }
+    Ok(())
 }
