@@ -15,16 +15,17 @@
 // }
 
 mod structs {
-    pub mod packet_header;
     pub mod packet_car_telemetry_data;
+    pub mod packet_header;
 }
-use std::io::Seek;
 use binrw::BinRead;
-use structs::packet_header::PacketHeader;
+use polars::prelude::*;
+use std::io::Seek;
 use structs::packet_car_telemetry_data::PacketCarTelemetryData;
+use structs::packet_header::PacketHeader;
 
 fn main() -> std::io::Result<()> {
-    let mut file = std::fs::File::open("/workspaces/f1-data-reader/f1logs/foo1.bin")?;
+    let mut file = std::fs::File::open("/workspaces/f1-data-reader/f1_logs/foo1.bin")?;
     while let Ok(message) = PacketHeader::read(&mut file) {
         println!(
             "packet_id: {}, session_uid: {}",
@@ -53,9 +54,11 @@ fn main() -> std::io::Result<()> {
 }
 
 fn print_car_telemetry(mut file: &std::fs::File) -> u64 {
-    let message = PacketCarTelemetryData::read(&mut file);
-    println!(
-        "Test"
-    );
+    let message = PacketCarTelemetryData::read(&mut file).unwrap();
+    let mut m_suggested_gear_vec: Vec<i64> = Vec::new();
+    m_suggested_gear_vec.push(i64::from(message.m_suggested_gear));
+    let my_series = Series::new("m_suggested_gear", m_suggested_gear_vec);
+    let df = df!("m_suggested_gear" => my_series);
+    println!("Test");
     1
 }
