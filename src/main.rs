@@ -55,10 +55,13 @@ fn main() -> std::io::Result<()> {
 
 fn print_car_telemetry(mut file: &std::fs::File) -> u64 {
     let message = PacketCarTelemetryData::read(&mut file).unwrap();
-    let mut m_suggested_gear_vec: Vec<i64> = Vec::new();
-    m_suggested_gear_vec.push(i64::from(message.m_suggested_gear));
-    let my_series = Series::new("m_suggested_gear", m_suggested_gear_vec);
-    let df = df!("m_suggested_gear" => my_series);
-    println!("Test");
+    let mut m_brake_vec: Vec<f32> = Vec::new();
+    for car_telemetry in message.m_car_telemetry_data {
+        m_brake_vec.push(car_telemetry.m_brake);
+    };
+    let my_series = Series::new("m_suggested_gear", m_brake_vec);
+    let mut df = df!("m_brake" => my_series).unwrap();
+    let mut file = std::fs::File::create("/workspaces/f1-data-reader/test.parquet").unwrap();
+    ParquetWriter::new(&mut file).finish(&mut df).unwrap();
     1
 }
