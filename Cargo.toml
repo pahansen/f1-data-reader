@@ -7,4 +7,4 @@ edition = "2021"
 
 [dependencies]
 binrw = "0.11.1"
-polars = { version = "0.27.2", features = ["parquet"] }
+parquet = "34.0.0"
