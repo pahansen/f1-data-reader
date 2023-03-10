@@ -18,11 +18,11 @@ mod structs {
     pub mod packet_car_telemetry_data;
     pub mod packet_header;
 }
-use std::{fs, path::Path, sync::Arc};
+use std::{fs::{self, File}, path::Path, sync::Arc};
 use parquet::{
     file::{
         properties::WriterProperties,
-        writer::SerializedFileWriter,
+        writer::{SerializedFileWriter},
     },
     basic::{Type as PhysicalType},
     schema::{parser::parse_message_type, printer, types::Type}, data_type::FloatType
@@ -34,41 +34,7 @@ use structs::packet_header::PacketHeader;
 
 fn main() -> std::io::Result<()> {
     let mut f1_log = std::fs::File::open("/workspaces/f1-data-reader/f1_logs/foo1.bin")?;
-    while let Ok(message) = PacketHeader::read(&mut f1_log) {
-        println!(
-            "packet_id: {}, session_uid: {}",
-            message.m_packet_id, message.m_session_uid
-        );
-        // Skip messages that are not implemented
-        match message.m_packet_id {
-            0 => f1_log.seek(std::io::SeekFrom::Current(1440))?,
-            1 => f1_log.seek(std::io::SeekFrom::Current(608))?,
-            2 => f1_log.seek(std::io::SeekFrom::Current(948))?,
-            3 => f1_log.seek(std::io::SeekFrom::Current(16))?,
-            4 => f1_log.seek(std::io::SeekFrom::Current(1233))?,
-            5 => f1_log.seek(std::io::SeekFrom::Current(1078))?,
-            //6 => file.seek(std::io::SeekFrom::Current(1323))?,
-            6 => print_car_telemetry(&f1_log),
-            7 => f1_log.seek(std::io::SeekFrom::Current(1034))?,
-            8 => f1_log.seek(std::io::SeekFrom::Current(991))?,
-            9 => f1_log.seek(std::io::SeekFrom::Current(1167))?,
-            10 => f1_log.seek(std::io::SeekFrom::Current(924))?,
-            11 => f1_log.seek(std::io::SeekFrom::Current(1131))?,
-
-            _ => 0, // Do nothing
-        };
-    }
-    Ok(())
-}
-
-fn print_car_telemetry(mut file: &std::fs::File) -> u64 {
-    let message = PacketCarTelemetryData::read(&mut file).unwrap();
-    let mut m_brake_vec: Vec<f32> = Vec::new();
-    let mut m_throttle_vec: Vec<f32> = Vec::new();
-    for car_telemetry in message.m_car_telemetry_data {
-        m_brake_vec.push(car_telemetry.m_brake);
-        m_throttle_vec.push(car_telemetry.m_throttle);
-    }
+    //Parquet setup
     let path = Path::new("/workspaces/f1-data-reader/f1_logs/sample.parquet");
     let m_brake = Type::primitive_type_builder("m_brake", PhysicalType::FLOAT)
         .build()
@@ -89,8 +55,46 @@ fn print_car_telemetry(mut file: &std::fs::File) -> u64 {
     let parsed_schema = Arc::new(parse_message_type(&string_schema).unwrap());
     
     let props = Arc::new(WriterProperties::builder().build());
-    let file = fs::File::create(path).unwrap();
-    let mut writer = SerializedFileWriter::new(file, parsed_schema, props).unwrap();
+    let parquet_file = fs::File::create(path).unwrap();
+    let mut writer = SerializedFileWriter::new(parquet_file, parsed_schema, props).unwrap();
+
+    while let Ok(message) = PacketHeader::read(&mut f1_log) {
+        println!(
+            "packet_id: {}, session_uid: {}",
+            message.m_packet_id, message.m_session_uid
+        );
+        // Skip messages that are not implemented
+        match message.m_packet_id {
+            0 => f1_log.seek(std::io::SeekFrom::Current(1440))?,
+            1 => f1_log.seek(std::io::SeekFrom::Current(608))?,
+            2 => f1_log.seek(std::io::SeekFrom::Current(948))?,
+            3 => f1_log.seek(std::io::SeekFrom::Current(16))?,
+            4 => f1_log.seek(std::io::SeekFrom::Current(1233))?,
+            5 => f1_log.seek(std::io::SeekFrom::Current(1078))?,
+            //6 => file.seek(std::io::SeekFrom::Current(1323))?,
+            6 => print_car_telemetry(&f1_log, &mut writer),
+            7 => f1_log.seek(std::io::SeekFrom::Current(1034))?,
+            8 => f1_log.seek(std::io::SeekFrom::Current(991))?,
+            9 => f1_log.seek(std::io::SeekFrom::Current(1167))?,
+            10 => f1_log.seek(std::io::SeekFrom::Current(924))?,
+            11 => f1_log.seek(std::io::SeekFrom::Current(1131))?,
+
+            _ => 0, // Do nothing
+        };
+    }
+    writer.close().unwrap();
+    Ok(())
+}
+
+fn print_car_telemetry(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) -> u64 {
+    let message = PacketCarTelemetryData::read(&mut file).unwrap();
+    let mut m_brake_vec: Vec<f32> = Vec::new();
+    let mut m_throttle_vec: Vec<f32> = Vec::new();
+    for car_telemetry in message.m_car_telemetry_data {
+        m_brake_vec.push(car_telemetry.m_brake);
+        m_throttle_vec.push(car_telemetry.m_throttle);
+    }
+    
     let mut row_group_writer = writer.next_row_group().unwrap();
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         // ... write values to a column writer
@@ -109,6 +113,6 @@ fn print_car_telemetry(mut file: &std::fs::File) -> u64 {
         col_writer.close().unwrap()
     }
     row_group_writer.close().unwrap();
-    writer.close().unwrap();    
+       
     1
 }
