@@ -7,7 +7,7 @@ pub fn write_float_column(row_group_writer: &mut parquet::file::writer::Serializ
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
         .typed::<FloatType>()
-        .write_batch(&column_data_vec, Some(&vec![1i16; column_data_vec.len()][..]), None)
+        .write_batch(&column_data_vec, None, None)
         .unwrap();
         col_writer.close().unwrap()
     }
@@ -17,7 +17,7 @@ pub fn write_int32_column(row_group_writer: &mut parquet::file::writer::Serializ
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
         .typed::<Int32Type>()
-        .write_batch(&column_data_vec, Some(&vec![1i16; column_data_vec.len()][..]), None)
+        .write_batch(&column_data_vec, None, None)
         .unwrap();
         col_writer.close().unwrap()
     }
