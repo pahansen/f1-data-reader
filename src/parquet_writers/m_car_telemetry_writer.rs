@@ -6,29 +6,17 @@ use parquet::{
         properties::WriterProperties,
         writer::SerializedFileWriter,
     },
-    data_type::FloatType,
-    basic::Type as PhysicalType,
-    schema::{parser::parse_message_type, printer, types::Type}
+    data_type::{FloatType, Int32Type},
+    schema::parser::parse_message_type
 };
 
 pub fn new(file_path: &Path) -> SerializedFileWriter<File>{
-    let m_brake = Type::primitive_type_builder("m_brake", PhysicalType::FLOAT)
-        .build()
-        .unwrap();
-    let m_throttle = Type::primitive_type_builder("m_throttle", PhysicalType::FLOAT)
-        .build()
-        .unwrap();
-
-    let schema = Type::group_type_builder("schema")
-        .with_fields(&mut vec![Arc::new(m_brake), Arc::new(m_throttle)])
-        .build()
-        .unwrap();
-
-    let mut buf = Vec::new();
-    printer::print_schema(&mut buf, &schema);
-    // Parse schema from the string
-    let string_schema = String::from_utf8(buf).unwrap();
-    let parsed_schema = Arc::new(parse_message_type(&string_schema).unwrap());
+    let schema = "message schema {
+        REQUIRED INT32 m_speed;
+        REQUIRED FLOAT m_brake;
+        REQUIRED FLOAT m_throttle;
+      }";
+    let parsed_schema = Arc::new(parse_message_type(schema).unwrap());
     
     let props = Arc::new(WriterProperties::builder().build());
     let parquet_file = fs::File::create(file_path).unwrap();
@@ -37,14 +25,23 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File>{
 
 pub fn write(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) -> u64{
     let message = PacketCarTelemetryData::read(&mut file).unwrap();
+    let mut m_speed_vec: Vec<i32> = Vec::new();
     let mut m_brake_vec: Vec<f32> = Vec::new();
     let mut m_throttle_vec: Vec<f32> = Vec::new();
     for car_telemetry in message.m_car_telemetry_data {
+        m_speed_vec.push(i32::from(car_telemetry.m_speed));
         m_brake_vec.push(car_telemetry.m_brake);
         m_throttle_vec.push(car_telemetry.m_throttle);
     }
     
     let mut row_group_writer = writer.next_row_group().unwrap();
+    if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
+        col_writer
+        .typed::<Int32Type>()
+        .write_batch(&m_speed_vec, Some(&vec![1i16; m_speed_vec.len()][..]), None)
+        .unwrap();
+        col_writer.close().unwrap()
+    }
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
         .typed::<FloatType>()
