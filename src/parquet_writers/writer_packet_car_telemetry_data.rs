@@ -1,4 +1,5 @@
 use crate::PacketCarTelemetryData;
+use crate::parquet_writers::util_column_writer::{write_float_column, write_int32_column};
 use binrw::BinRead;
 use std::{fs::{self, File}, path::Path, sync::Arc};
 use parquet::{
@@ -6,15 +7,18 @@ use parquet::{
         properties::WriterProperties,
         writer::SerializedFileWriter,
     },
-    data_type::{FloatType, Int32Type},
     schema::parser::parse_message_type
 };
 
 pub fn new(file_path: &Path) -> SerializedFileWriter<File>{
     let schema = "message schema {
         REQUIRED INT32 m_speed;
-        REQUIRED FLOAT m_brake;
         REQUIRED FLOAT m_throttle;
+        REQUIRED FLOAT m_steer;
+        REQUIRED FLOAT m_brake;
+        REQUIRED INT32 m_clutch;
+        REQUIRED INT32 m_engine_rpm;
+        REQUIRED INT32 m_drs;
       }";
     let parsed_schema = Arc::new(parse_message_type(schema).unwrap());
     
@@ -26,36 +30,32 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File>{
 pub fn write(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) -> u64{
     let message = PacketCarTelemetryData::read(&mut file).unwrap();
     let mut m_speed_vec: Vec<i32> = Vec::new();
-    let mut m_brake_vec: Vec<f32> = Vec::new();
     let mut m_throttle_vec: Vec<f32> = Vec::new();
+    let mut m_steer_vec: Vec<f32> = Vec::new();
+    let mut m_brake_vec: Vec<f32> = Vec::new();
+    let mut m_clutch_vec: Vec<i32> = Vec::new();
+    let mut m_engine_rpm_vec: Vec<i32> = Vec::new();
+    let mut m_drs_vec: Vec<i32> = Vec::new();
     for car_telemetry in message.m_car_telemetry_data {
         m_speed_vec.push(i32::from(car_telemetry.m_speed));
-        m_brake_vec.push(car_telemetry.m_brake);
         m_throttle_vec.push(car_telemetry.m_throttle);
+        m_steer_vec.push(car_telemetry.m_steer);
+        m_brake_vec.push(car_telemetry.m_brake);
+        m_clutch_vec.push(i32::from(car_telemetry.m_clutch));
+        m_engine_rpm_vec.push(i32::from(car_telemetry.m_engine_rpm));
+        m_drs_vec.push(i32::from(car_telemetry.m_drs));
     }
-    
     let mut row_group_writer = writer.next_row_group().unwrap();
-    if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-        col_writer
-        .typed::<Int32Type>()
-        .write_batch(&m_speed_vec, Some(&vec![1i16; m_speed_vec.len()][..]), None)
-        .unwrap();
-        col_writer.close().unwrap()
-    }
-    if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-        col_writer
-        .typed::<FloatType>()
-        .write_batch(&m_brake_vec, Some(&vec![1i16; m_brake_vec.len()][..]), None)
-        .unwrap();
-        col_writer.close().unwrap()
-    }
-    if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-        col_writer
-        .typed::<FloatType>()
-        .write_batch(&m_throttle_vec, Some(&vec![1i16; m_throttle_vec.len()][..]), None)
-        .unwrap();
-        col_writer.close().unwrap()
-    }
+
+    write_int32_column(&mut row_group_writer, m_speed_vec);
+    write_float_column(&mut row_group_writer, m_throttle_vec);    
+    write_float_column(&mut row_group_writer, m_steer_vec);
+    write_float_column(&mut row_group_writer, m_brake_vec);
+    write_int32_column(&mut row_group_writer, m_clutch_vec);
+    write_int32_column(&mut row_group_writer, m_engine_rpm_vec);
+    write_int32_column(&mut row_group_writer, m_drs_vec);
+    
     row_group_writer.close().unwrap();
     1
 }
+

@@ -19,11 +19,12 @@ mod structs {
     pub mod packet_header;
 }
 mod parquet_writers {
-    pub mod m_car_telemetry_writer;
+    pub mod writer_packet_car_telemetry_data;
+    pub mod util_column_writer;
 }
 use std::{fs::File, path::Path};
 use binrw::BinRead;
-use parquet_writers::m_car_telemetry_writer;
+use parquet_writers::writer_packet_car_telemetry_data;
 use std::io::Seek;
 use structs::packet_car_telemetry_data::PacketCarTelemetryData;
 use structs::packet_header::PacketHeader;
@@ -33,7 +34,7 @@ fn main() -> std::io::Result<()> {
     //Parquet setup
     let path = Path::new("/workspaces/f1-data-reader/f1_logs/sample.parquet");
    
-    let mut writer = m_car_telemetry_writer::new(path);
+    let mut writer = writer_packet_car_telemetry_data::new(path);
 
     while let Ok(message) = PacketHeader::read(&mut f1_log) {
         // Skip messages that are not implemented
@@ -45,7 +46,7 @@ fn main() -> std::io::Result<()> {
             4 => f1_log.seek(std::io::SeekFrom::Current(1233))?,
             5 => f1_log.seek(std::io::SeekFrom::Current(1078))?,
             //6 => file.seek(std::io::SeekFrom::Current(1323))?,
-            6 => m_car_telemetry_writer::write(&f1_log, &mut writer),
+            6 => writer_packet_car_telemetry_data::write(&f1_log, &mut writer),
             7 => f1_log.seek(std::io::SeekFrom::Current(1034))?,
             8 => f1_log.seek(std::io::SeekFrom::Current(991))?,
             9 => f1_log.seek(std::io::SeekFrom::Current(1167))?,
