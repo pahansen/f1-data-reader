@@ -47,13 +47,13 @@ pub fn write(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) 
     }
     let mut row_group_writer = writer.next_row_group().unwrap();
 
-    write_int32_column(&mut row_group_writer, m_speed_vec);
-    write_float_column(&mut row_group_writer, m_throttle_vec);    
-    write_float_column(&mut row_group_writer, m_steer_vec);
-    write_float_column(&mut row_group_writer, m_brake_vec);
-    write_int32_column(&mut row_group_writer, m_clutch_vec);
-    write_int32_column(&mut row_group_writer, m_engine_rpm_vec);
-    write_int32_column(&mut row_group_writer, m_drs_vec);
+    write_int32_column(&mut row_group_writer, m_speed_vec, None, None);
+    write_float_column(&mut row_group_writer, m_throttle_vec, None, None);    
+    write_float_column(&mut row_group_writer, m_steer_vec, None, None);
+    write_float_column(&mut row_group_writer, m_brake_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_clutch_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_engine_rpm_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_drs_vec, None, None);
     
     row_group_writer.close().unwrap();
     1
