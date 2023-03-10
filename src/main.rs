@@ -59,10 +59,6 @@ fn main() -> std::io::Result<()> {
     let mut writer = SerializedFileWriter::new(parquet_file, parsed_schema, props).unwrap();
 
     while let Ok(message) = PacketHeader::read(&mut f1_log) {
-        println!(
-            "packet_id: {}, session_uid: {}",
-            message.m_packet_id, message.m_session_uid
-        );
         // Skip messages that are not implemented
         match message.m_packet_id {
             0 => f1_log.seek(std::io::SeekFrom::Current(1440))?,
@@ -97,7 +93,6 @@ fn print_car_telemetry(mut file: &std::fs::File, writer: &mut SerializedFileWrit
     
     let mut row_group_writer = writer.next_row_group().unwrap();
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-        // ... write values to a column writer
         col_writer
         .typed::<FloatType>()
         .write_batch(&m_brake_vec, Some(&vec![1i16; m_brake_vec.len()][..]), None)
@@ -105,7 +100,6 @@ fn print_car_telemetry(mut file: &std::fs::File, writer: &mut SerializedFileWrit
         col_writer.close().unwrap()
     }
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
-        // ... write values to a column writer
         col_writer
         .typed::<FloatType>()
         .write_batch(&m_throttle_vec, Some(&vec![1i16; m_throttle_vec.len()][..]), None)
