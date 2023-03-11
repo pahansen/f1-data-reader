@@ -7,4 +7,5 @@ edition = "2021"
 
 [dependencies]
 binrw = "0.11.1"
+clap = { version = "4.1.8", features = ["derive"] }
 parquet = "34.0.0"
