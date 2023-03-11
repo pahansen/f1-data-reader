@@ -1,5 +1,5 @@
-use crate::PacketCarTelemetryData;
-use crate::PacketHeader;
+use crate::structs::packet_car_telemetry_data::PacketCarTelemetryData;
+use crate::structs::packet_header::PacketHeader;
 use crate::parquet_writers::util_column_writer::{write_float_column, write_int32_column, write_bool_column, write_u64_as_bytearray_column};
 use binrw::BinRead;
 use std::{fs::{self, File}, path::Path, sync::Arc};
