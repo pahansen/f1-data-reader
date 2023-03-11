@@ -1,14 +1,14 @@
-use crate::structs::packet_header::PacketHeader;
 use crate::parquet_writers::writer_packet_car_telemetry_data;
-use std::{fs::File, path::Path};
+use crate::structs::packet_header::PacketHeader;
 use binrw::BinRead;
 use std::io::Seek;
+use std::{fs::File, path::Path};
 
-pub fn parse_recorded_file() -> std::io::Result<()> {
-    let mut f1_log = File::open("/workspaces/f1-data-reader/f1_logs/foo1.bin")?;
+pub fn parse_recorded_file(f1_log_path: &str, parquet_path: &str) -> std::io::Result<()> {
+    let mut f1_log = File::open(f1_log_path)?;
     //Parquet setup
-    let path = Path::new("/workspaces/f1-data-reader/f1_logs/sample.parquet");
-   
+    let path = Path::new(parquet_path);
+
     let mut writer = writer_packet_car_telemetry_data::new(path);
 
     while let Ok(message) = PacketHeader::read(&mut f1_log) {

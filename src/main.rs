@@ -7,22 +7,24 @@ mod structs {
     pub mod parser;
 }
 mod parquet_writers {
-    pub mod writer_packet_car_telemetry_data;
     pub mod util_column_writer;
+    pub mod writer_packet_car_telemetry_data;
 }
+use recorder::udp_recorder;
 use std::env;
 use structs::parser;
-use recorder::udp_recorder;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
     let function_call = &args[1];
+    let f1_log_path = &args[2];
+    let parsed_file_path = &args[3];
     if function_call == "record" {
-        println!("Recording udp data...");
-        udp_recorder::record().unwrap();
+        println!("Recording f1 log...");
+        udp_recorder::record(f1_log_path).unwrap();
     } else {
-        println!("Writing to recorded udp data to parquet...");
-        parser::parse_recorded_file().unwrap();
+        println!("Writing f1 log to parquet...");
+        parser::parse_recorded_file(f1_log_path, parsed_file_path).unwrap();
     }
     Ok(())
 }
