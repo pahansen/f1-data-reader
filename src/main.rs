@@ -46,7 +46,7 @@ fn main() -> std::io::Result<()> {
             4 => f1_log.seek(std::io::SeekFrom::Current(1233))?,
             5 => f1_log.seek(std::io::SeekFrom::Current(1078))?,
             //6 => file.seek(std::io::SeekFrom::Current(1323))?,
-            6 => writer_packet_car_telemetry_data::write(&f1_log, &mut writer),
+            6 => writer_packet_car_telemetry_data::write(&message, &f1_log, &mut writer),
             7 => f1_log.seek(std::io::SeekFrom::Current(1034))?,
             8 => f1_log.seek(std::io::SeekFrom::Current(991))?,
             9 => f1_log.seek(std::io::SeekFrom::Current(1167))?,
