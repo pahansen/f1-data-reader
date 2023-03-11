@@ -19,6 +19,8 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File>{
         REQUIRED INT32 m_clutch;
         REQUIRED INT32 m_engine_rpm;
         REQUIRED INT32 m_drs;
+        REQUIRED INT32 m_rev_lights_percent;
+        REQUIRED INT32 m_rev_lights_bit_value;
       }";
     let parsed_schema = Arc::new(parse_message_type(schema).unwrap());
     
@@ -36,6 +38,8 @@ pub fn write(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) 
     let mut m_clutch_vec: Vec<i32> = Vec::new();
     let mut m_engine_rpm_vec: Vec<i32> = Vec::new();
     let mut m_drs_vec: Vec<i32> = Vec::new();
+    let mut m_rev_lights_percent_vec: Vec<i32> = Vec::new();
+    let mut m_rev_lights_bit_value_vec: Vec<i32> = Vec::new();
     for car_telemetry in message.m_car_telemetry_data {
         m_speed_vec.push(i32::from(car_telemetry.m_speed));
         m_throttle_vec.push(car_telemetry.m_throttle);
@@ -44,6 +48,8 @@ pub fn write(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) 
         m_clutch_vec.push(i32::from(car_telemetry.m_clutch));
         m_engine_rpm_vec.push(i32::from(car_telemetry.m_engine_rpm));
         m_drs_vec.push(i32::from(car_telemetry.m_drs));
+        m_rev_lights_percent_vec.push(i32::from(car_telemetry.m_rev_lights_percent));
+        m_rev_lights_bit_value_vec.push(i32::from(car_telemetry.m_rev_lights_bit_value));
     }
     let mut row_group_writer = writer.next_row_group().unwrap();
 
@@ -54,6 +60,9 @@ pub fn write(mut file: &std::fs::File, writer: &mut SerializedFileWriter<File>) 
     write_int32_column(&mut row_group_writer, m_clutch_vec, None, None);
     write_int32_column(&mut row_group_writer, m_engine_rpm_vec, None, None);
     write_int32_column(&mut row_group_writer, m_drs_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_rev_lights_percent_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_rev_lights_bit_value_vec, None, None);
+    
     
     row_group_writer.close().unwrap();
     1
