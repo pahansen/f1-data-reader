@@ -1,4 +1,4 @@
-use binrw::{BinRead};
+use binrw::BinRead;
 
 #[derive(Debug, BinRead)]
 #[br(little)]

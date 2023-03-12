@@ -4,12 +4,14 @@ mod recorder {
 mod structs {
     pub mod packet_car_telemetry_data;
     pub mod packet_header;
+    pub mod packet_lap_data;
     pub mod packet_participants_data;
     pub mod parser;
 }
 mod parquet_writers {
     pub mod util_column_writer;
     pub mod writer_packet_car_telemetry_data;
+    pub mod writer_packet_laps_data;
     pub mod writer_packet_participants_data;
 }
 use clap::{Parser, ValueEnum};
