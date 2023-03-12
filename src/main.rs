@@ -23,7 +23,7 @@ enum Mode {
     /// Record udp stream to f1 log file.
     Recorder {
         #[arg(long)]
-        /// File path of F1 log.
+        /// File path for F1 log.
         f1_log_file_path: String,
     },
     /// Parse f1 log file to parquet files.
