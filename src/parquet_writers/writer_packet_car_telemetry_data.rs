@@ -102,7 +102,7 @@ pub fn write(
         None,
         None,
     );
-    write_int32_column(&mut row_group_writer, participant_index, None, None);
+    write_int32_column(&mut row_group_writer, car_telemetry_index, None, None);
     write_int32_column(&mut row_group_writer, m_speed_vec, None, None);
     write_float_column(&mut row_group_writer, m_throttle_vec, None, None);
     write_float_column(&mut row_group_writer, m_steer_vec, None, None);
