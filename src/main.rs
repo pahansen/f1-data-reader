@@ -14,44 +14,51 @@ mod parquet_writers {
     pub mod writer_packet_laps_data;
     pub mod writer_packet_participants_data;
 }
-use clap::{Parser, ValueEnum};
+use clap::{Parser, Subcommand};
 use recorder::udp_recorder;
 use structs::parser;
+
+#[derive(Subcommand, Debug)]
+enum Mode {
+    /// Record udp stream to f1 log file.
+    Recorder {
+        #[arg(long)]
+        /// File path of F1 log.
+        f1_log_file_path: String,
+    },
+    /// Parse f1 log file to parquet files.
+    Parser {
+        #[arg(long)]
+        /// File path of F1 log.
+        f1_log_file_path: String,
+        #[arg(long)]
+        /// Folder path wher parquet files should be stored.
+        parquet_folder_path: String,
+    },
+}
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {
-    /// What mode to run the program in
-    #[arg(value_enum)]
+    #[command(subcommand)]
     mode: Mode,
-    /// File path of F1 log.
-    #[arg(long)]
-    f1_log_file_path: String,
-    /// File path of parquet file.
-    #[arg(long)]
-    parquet_folder_path: Option<String>,
-}
-
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
-enum Mode {
-    /// Record f1 log
-    Recorder,
-    /// Parse recorded f1 log
-    Parser,
 }
 
 fn main() -> std::io::Result<()> {
     let cli = Cli::parse();
 
-    match cli.mode {
-        Mode::Recorder => {
+    match &cli.mode {
+        Mode::Recorder { f1_log_file_path } => {
             println!("Recording f1 log...");
-            udp_recorder::record(&cli.f1_log_file_path).unwrap();
+            udp_recorder::record(f1_log_file_path).unwrap();
         }
-        Mode::Parser => {
+        Mode::Parser {
+            f1_log_file_path,
+            parquet_folder_path,
+        } => {
             println!("Writing f1 log to parquet...");
-            let parquet_folder_path = cli.parquet_folder_path.unwrap();
-            parser::parse_recorded_file(&cli.f1_log_file_path, &parquet_folder_path).unwrap();
+            let parquet_folder_path = parquet_folder_path;
+            parser::parse_recorded_file(f1_log_file_path, parquet_folder_path).unwrap();
         }
     }
     Ok(())
