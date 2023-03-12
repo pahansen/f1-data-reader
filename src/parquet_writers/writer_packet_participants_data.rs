@@ -11,8 +11,8 @@ use parquet::{
 use std::{
     fs::{self, File},
     path::Path,
+    str,
     sync::Arc,
-    str
 };
 
 use super::util_column_writer::write_string_as_bytearray_column;
