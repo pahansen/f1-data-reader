@@ -21,6 +21,7 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File> {
         REQUIRED FLOAT m_session_time;
         REQUIRED BOOLEAN is_player_car;
         REQUIRED BOOLEAN is_secondary_player_car;
+        REQUIRED INT32 car_telemetry_index;
         REQUIRED INT32 m_speed;
         REQUIRED FLOAT m_throttle;
         REQUIRED FLOAT m_steer;
@@ -53,6 +54,7 @@ pub fn write(
     if usize::from(packet_header.m_secondary_player_car_index) < len_car_telemetry {
         is_secondary_player_car_vec[usize::from(packet_header.m_player_car_index)] = true;
     }
+    let car_telemetry_index: Vec<i32> = (0..22).collect();
     let mut m_speed_vec: Vec<i32> = Vec::new();
     let mut m_throttle_vec: Vec<f32> = Vec::new();
     let mut m_steer_vec: Vec<f32> = Vec::new();
@@ -100,6 +102,7 @@ pub fn write(
         None,
         None,
     );
+    write_int32_column(&mut row_group_writer, participant_index, None, None);
     write_int32_column(&mut row_group_writer, m_speed_vec, None, None);
     write_float_column(&mut row_group_writer, m_throttle_vec, None, None);
     write_float_column(&mut row_group_writer, m_steer_vec, None, None);

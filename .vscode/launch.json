@@ -1,12 +1,15 @@
 {
     "version": "0.2.0",
     "configurations": [
+
+
+
         {
             "type": "lldb",
             "request": "launch",
             "name": "Debug",
             "program": "${workspaceFolder}/target/debug/f1_data_reader",
-            "args": [],
+            "args": ["parser", "--f1-log-file-path", "/workspaces/f1-data-reader/f1_logs/foo2.binlog", "--parquet-folder-path", "/workspaces/f1-data-reader/f1_logs"],
             "cwd": "${workspaceFolder}"
         }
     ]

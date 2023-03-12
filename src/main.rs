@@ -4,11 +4,13 @@ mod recorder {
 mod structs {
     pub mod packet_car_telemetry_data;
     pub mod packet_header;
+    pub mod packet_participants_data;
     pub mod parser;
 }
 mod parquet_writers {
     pub mod util_column_writer;
     pub mod writer_packet_car_telemetry_data;
+    pub mod writer_packet_participants_data;
 }
 use clap::{Parser, ValueEnum};
 use recorder::udp_recorder;
@@ -25,7 +27,7 @@ struct Cli {
     f1_log_file_path: String,
     /// File path of parquet file.
     #[arg(long)]
-    parquet_file_path: Option<String>,
+    parquet_folder_path: Option<String>,
 }
 
 #[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, ValueEnum)]
@@ -46,8 +48,8 @@ fn main() -> std::io::Result<()> {
         }
         Mode::Parser => {
             println!("Writing f1 log to parquet...");
-            let parquet_file_path = cli.parquet_file_path.unwrap();
-            parser::parse_recorded_file(&cli.f1_log_file_path, &parquet_file_path).unwrap();
+            let parquet_folder_path = cli.parquet_folder_path.unwrap();
+            parser::parse_recorded_file(&cli.f1_log_file_path, &parquet_folder_path).unwrap();
         }
     }
     Ok(())
