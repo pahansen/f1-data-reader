@@ -10,14 +10,17 @@
 			"VARIANT": "bullseye"
 		}
 	},
-	"runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
-		
+	"runArgs": [
+		"--cap-add=SYS_PTRACE",
+		"--security-opt",
+		"seccomp=unconfined"
+	],
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
-			"settings": { 
+			"settings": {
 				"lldb.executable": "/usr/bin/lldb",
 				// VS Code don't watch files under ./target
 				"files.watcherExclude": {
@@ -25,25 +28,25 @@
 				},
 				"rust-analyzer.checkOnSave.command": "clippy"
 			},
-			
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
 				"vadimcn.vscode-lldb",
 				"mutantdino.resourcemonitor",
 				"matklad.rust-analyzer",
 				"tamasfe.even-better-toml",
-				"serayuzgur.crates"
+				"serayuzgur.crates",
+				"github.vscode-pull-request-github",
+				"eamodio.gitlens"
 			]
 		}
 	},
-	"appPort": [ "5005:5005/udp" ],
-
+	"appPort": [
+		"20777:20777/udp"
+	],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "rustc --version",
-
 	// Comment out to run as root instead.
 	"remoteUser": "vscode"
 }
