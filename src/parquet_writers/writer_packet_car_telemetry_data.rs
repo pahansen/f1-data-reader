@@ -27,6 +27,7 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File> {
         REQUIRED FLOAT m_steer;
         REQUIRED FLOAT m_brake;
         REQUIRED INT32 m_clutch;
+        REQUIRED INT32 m_gear;
         REQUIRED INT32 m_engine_rpm;
         REQUIRED INT32 m_drs;
         REQUIRED INT32 m_rev_lights_percent;
@@ -60,6 +61,7 @@ pub fn write(
     let mut m_steer_vec: Vec<f32> = Vec::new();
     let mut m_brake_vec: Vec<f32> = Vec::new();
     let mut m_clutch_vec: Vec<i32> = Vec::new();
+    let mut m_gear_vec: Vec<i32> = Vec::new();
     let mut m_engine_rpm_vec: Vec<i32> = Vec::new();
     let mut m_drs_vec: Vec<i32> = Vec::new();
     let mut m_rev_lights_percent_vec: Vec<i32> = Vec::new();
@@ -70,6 +72,7 @@ pub fn write(
         m_steer_vec.push(car_telemetry.m_steer);
         m_brake_vec.push(car_telemetry.m_brake);
         m_clutch_vec.push(i32::from(car_telemetry.m_clutch));
+        m_gear_vec.push(i32::from(car_telemetry.m_gear));
         m_engine_rpm_vec.push(i32::from(car_telemetry.m_engine_rpm));
         m_drs_vec.push(i32::from(car_telemetry.m_drs));
         m_rev_lights_percent_vec.push(i32::from(car_telemetry.m_rev_lights_percent));
@@ -108,6 +111,7 @@ pub fn write(
     write_float_column(&mut row_group_writer, m_steer_vec, None, None);
     write_float_column(&mut row_group_writer, m_brake_vec, None, None);
     write_int32_column(&mut row_group_writer, m_clutch_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_gear_vec, None, None);
     write_int32_column(&mut row_group_writer, m_engine_rpm_vec, None, None);
     write_int32_column(&mut row_group_writer, m_drs_vec, None, None);
     write_int32_column(&mut row_group_writer, m_rev_lights_percent_vec, None, None);
