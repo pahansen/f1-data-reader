@@ -2,6 +2,7 @@ mod recorder {
     pub mod udp_recorder;
 }
 mod structs {
+    pub mod packet_car_status_data;
     pub mod packet_car_telemetry_data;
     pub mod packet_header;
     pub mod packet_lap_data;
@@ -10,6 +11,7 @@ mod structs {
 }
 mod parquet_writers {
     pub mod util_column_writer;
+    pub mod writer_packet_car_status_data;
     pub mod writer_packet_car_telemetry_data;
     pub mod writer_packet_laps_data;
     pub mod writer_packet_participants_data;

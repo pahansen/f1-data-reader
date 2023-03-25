@@ -1,5 +1,6 @@
 use crate::parquet_writers::{
-    writer_packet_car_telemetry_data, writer_packet_laps_data, writer_packet_participants_data,
+    writer_packet_car_status_data, writer_packet_car_telemetry_data, writer_packet_laps_data,
+    writer_packet_participants_data,
 };
 use crate::structs::packet_header::PacketHeader;
 use binrw::BinRead;
@@ -21,10 +22,15 @@ pub fn parse_recorded_file(f1_log_path: &str, parquet_folder_path: &str) -> std:
     let folder_path: String = parquet_folder_path.to_owned();
     let laps_file = folder_path + "/laps.parquet";
     let laps_path = Path::new(&laps_file);
+    // Car Status Data
+    let folder_path: String = parquet_folder_path.to_owned();
+    let car_status_file = folder_path + "/car_status.parquet";
+    let car_status_path = Path::new(&car_status_file);
 
     let mut car_telemetry_writer = writer_packet_car_telemetry_data::new(car_telemetry_path);
     let mut participants_writer = writer_packet_participants_data::new(participants_path);
     let mut laps_writer = writer_packet_laps_data::new(laps_path);
+    let mut car_status_writer = writer_packet_car_status_data::new(car_status_path);
 
     while let Ok(message) = PacketHeader::read(&mut f1_log) {
         // Skip messages that are not implemented
@@ -45,7 +51,8 @@ pub fn parse_recorded_file(f1_log_path: &str, parquet_folder_path: &str) -> std:
                 &f1_log,
                 &mut car_telemetry_writer,
             ),
-            7 => f1_log.seek(std::io::SeekFrom::Current(1034))?,
+            //7 => f1_log.seek(std::io::SeekFrom::Current(1034))?,
+            7 => writer_packet_car_status_data::write(&message, &f1_log, &mut car_status_writer),
             8 => f1_log.seek(std::io::SeekFrom::Current(991))?,
             9 => f1_log.seek(std::io::SeekFrom::Current(1167))?,
             10 => f1_log.seek(std::io::SeekFrom::Current(924))?,
@@ -57,5 +64,6 @@ pub fn parse_recorded_file(f1_log_path: &str, parquet_folder_path: &str) -> std:
     car_telemetry_writer.close().unwrap();
     participants_writer.close().unwrap();
     laps_writer.close().unwrap();
+    car_status_writer.close().unwrap();
     Ok(())
 }
