@@ -95,8 +95,6 @@ pub fn write(
     write_float_column(
         &mut row_group_writer,
         vec![packet_header.m_session_time; len_car_telemetry],
-        None,
-        None,
     );
     write_bool_column(&mut row_group_writer, is_player_car_vec, None, None);
     write_bool_column(
@@ -107,9 +105,9 @@ pub fn write(
     );
     write_int32_column(&mut row_group_writer, car_telemetry_index, None, None);
     write_int32_column(&mut row_group_writer, m_speed_vec, None, None);
-    write_float_column(&mut row_group_writer, m_throttle_vec, None, None);
-    write_float_column(&mut row_group_writer, m_steer_vec, None, None);
-    write_float_column(&mut row_group_writer, m_brake_vec, None, None);
+    write_float_column(&mut row_group_writer, m_throttle_vec,);
+    write_float_column(&mut row_group_writer, m_steer_vec,);
+    write_float_column(&mut row_group_writer, m_brake_vec,);
     write_int32_column(&mut row_group_writer, m_clutch_vec, None, None);
     write_int32_column(&mut row_group_writer, m_gear_vec, None, None);
     write_int32_column(&mut row_group_writer, m_engine_rpm_vec, None, None);

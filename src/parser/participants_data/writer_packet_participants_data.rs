@@ -72,8 +72,6 @@ pub fn write(
     write_float_column(
         &mut row_group_writer,
         vec![packet_header.m_session_time; len_participants],
-        None,
-        None,
     );
     write_bool_column(&mut row_group_writer, is_player_car_vec, None, None);
     write_bool_column(

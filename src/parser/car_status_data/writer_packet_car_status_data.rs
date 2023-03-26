@@ -81,8 +81,6 @@ pub fn write(
     write_float_column(
         &mut row_group_writer,
         vec![packet_header.m_session_time; number_of_cars],
-        None,
-        None,
     );
     write_bool_column(&mut row_group_writer, is_player_car_vec, None, None);
     write_bool_column(
@@ -92,29 +90,23 @@ pub fn write(
         None,
     );
     write_int32_column(&mut row_group_writer, car_index, None, None);
-    write_float_column(&mut row_group_writer, m_fuel_in_tank, None, None);
-    write_float_column(&mut row_group_writer, m_fuel_capacity, None, None);
-    write_float_column(&mut row_group_writer, m_fuel_remaining_laps, None, None);
+    write_float_column(&mut row_group_writer, m_fuel_in_tank);
+    write_float_column(&mut row_group_writer, m_fuel_capacity);
+    write_float_column(&mut row_group_writer, m_fuel_remaining_laps);
     write_int32_column(&mut row_group_writer, m_actual_tyre_compund, None, None);
     write_int32_column(&mut row_group_writer, m_tyres_age_laps, None, None);
-    write_float_column(&mut row_group_writer, m_ers_store_energy, None, None);
+    write_float_column(&mut row_group_writer, m_ers_store_energy);
     write_float_column(
         &mut row_group_writer,
         m_ers_harvested_this_lap_mguk,
-        None,
-        None,
     );
     write_float_column(
         &mut row_group_writer,
         m_ers_harvested_this_lap_mguh,
-        None,
-        None,
     );
     write_float_column(
         &mut row_group_writer,
         m_ers_deployed_this_lap,
-        None,
-        None,
     );
 
     row_group_writer.close().unwrap();

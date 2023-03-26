@@ -84,8 +84,6 @@ pub fn write(
     write_float_column(
         &mut row_group_writer,
         vec![packet_header.m_session_time; len_lap],
-        None,
-        None,
     );
     write_bool_column(&mut row_group_writer, is_player_car_vec, None, None);
     write_bool_column(
@@ -104,7 +102,7 @@ pub fn write(
     );
     write_int32_column(&mut row_group_writer, m_sector1_time_in_ms_vec, None, None);
     write_int32_column(&mut row_group_writer, m_sector2_time_in_ms_vec, None, None);
-    write_float_column(&mut row_group_writer, m_lap_distance_vec, None, None);
+    write_float_column(&mut row_group_writer, m_lap_distance_vec,);
     write_int32_column(&mut row_group_writer, m_current_lap_num_vec, None, None);
 
     row_group_writer.close().unwrap();
