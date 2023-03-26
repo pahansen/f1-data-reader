@@ -21,7 +21,7 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File> {
         REQUIRED FLOAT m_session_time;
         REQUIRED BOOLEAN is_player_car;
         REQUIRED BOOLEAN is_secondary_player_car;
-        REQUIRED INT32 car_status_index;
+        REQUIRED INT32 car_index;
         REQUIRED FLOAT m_fuel_in_tank;
         REQUIRED FLOAT m_fuel_capacity;
         REQUIRED FLOAT m_fuel_remaining_laps;
@@ -45,54 +45,42 @@ pub fn write(
     writer: &mut SerializedFileWriter<File>,
 ) -> u64 {
     let message = PacketCarStatusData::read(&mut file).unwrap();
-    let len_car_telemetry = message.m_car_status_data.len();
-    let mut is_player_car_vec: Vec<bool> = vec![false; len_car_telemetry];
-    if usize::from(packet_header.m_player_car_index) < len_car_telemetry {
+    let number_of_cars = message.m_car_status_data.len();
+    let mut is_player_car_vec: Vec<bool> = vec![false; number_of_cars];
+    if usize::from(packet_header.m_player_car_index) < number_of_cars {
         is_player_car_vec[usize::from(packet_header.m_player_car_index)] = true;
     }
-    let mut is_secondary_player_car_vec: Vec<bool> = vec![false; len_car_telemetry];
-    if usize::from(packet_header.m_secondary_player_car_index) < len_car_telemetry {
+    let mut is_secondary_player_car_vec: Vec<bool> = vec![false; number_of_cars];
+    if usize::from(packet_header.m_secondary_player_car_index) < number_of_cars {
         is_secondary_player_car_vec[usize::from(packet_header.m_player_car_index)] = true;
     }
-    let car_status_index: Vec<i32> = (0..22).collect();
-    let mut m_fuel_in_tank_vec: Vec<f32> = Vec::new();
-    let mut m_fuel_capacity_vec: Vec<f32> = Vec::new();
-    let mut m_fuel_remaining_laps: Vec<f32> = Vec::new();
-    let mut m_actual_tyre_compund_vec: Vec<i32> = Vec::new();
-    let mut m_tyres_age_laps_vec: Vec<i32> = Vec::new();
-    let mut m_ers_store_energy_vec: Vec<f32> = Vec::new();
-    let mut m_ers_harvested_this_lap_mguk_vec: Vec<f32> = Vec::new();
-    let mut m_ers_harvested_this_lap_mguh_vec: Vec<f32> = Vec::new();
-    let mut m_ers_deployed_this_lap_vec: Vec<f32> = Vec::new();
-
-    for car_status in message.m_car_status_data {
-        m_fuel_in_tank_vec.push(car_status.m_fuel_in_tank);
-        m_fuel_capacity_vec.push(car_status.m_fuel_capacity);
-        m_fuel_remaining_laps.push(car_status.m_fuel_remaining_laps);
-        m_actual_tyre_compund_vec.push(i32::from(car_status.m_actual_tyre_compound));
-        m_tyres_age_laps_vec.push(i32::from(car_status.m_tyres_age_laps));
-        m_ers_store_energy_vec.push(car_status.m_ers_store_energy);
-        m_ers_harvested_this_lap_mguk_vec.push(car_status.m_ers_harvested_this_lap_mguk);
-        m_ers_harvested_this_lap_mguh_vec.push(car_status.m_ers_harvested_this_lap_mguh);
-        m_ers_deployed_this_lap_vec.push(car_status.m_ers_deployed_this_lap);
-    }
+    let car_index: Vec<i32> = (0..22).collect();
+    let m_fuel_in_tank = message.m_car_status_data.iter().map(|c| c.m_fuel_in_tank).collect::<Vec<f32>>();
+    let m_fuel_capacity = message.m_car_status_data.iter().map(|c| c.m_fuel_capacity).collect::<Vec<f32>>();
+    let m_fuel_remaining_laps = message.m_car_status_data.iter().map(|c| c.m_fuel_remaining_laps).collect::<Vec<f32>>();
+    let m_actual_tyre_compund = message.m_car_status_data.iter().map(|c| i32::from(c.m_actual_tyre_compound)).collect::<Vec<i32>>();
+    let m_tyres_age_laps = message.m_car_status_data.iter().map(|c| i32::from(c.m_tyres_age_laps)).collect::<Vec<i32>>();
+    let m_ers_store_energy = message.m_car_status_data.iter().map(|c| c.m_ers_store_energy).collect::<Vec<f32>>();
+    let m_ers_harvested_this_lap_mguk = message.m_car_status_data.iter().map(|c| c.m_ers_harvested_this_lap_mguk).collect::<Vec<f32>>();
+    let m_ers_harvested_this_lap_mguh = message.m_car_status_data.iter().map(|c| c.m_ers_harvested_this_lap_mguh).collect::<Vec<f32>>();
+    let m_ers_deployed_this_lap = message.m_car_status_data.iter().map(|c| c.m_ers_deployed_this_lap).collect::<Vec<f32>>();
 
     let mut row_group_writer = writer.next_row_group().unwrap();
     write_int32_column(
         &mut row_group_writer,
-        vec![i32::from(packet_header.m_packet_format); len_car_telemetry],
+        vec![i32::from(packet_header.m_packet_format); number_of_cars],
         None,
         None,
     );
     write_u64_as_bytearray_column(
         &mut row_group_writer,
-        vec![packet_header.m_session_uid; len_car_telemetry],
+        vec![packet_header.m_session_uid; number_of_cars],
         None,
         None,
     );
     write_float_column(
         &mut row_group_writer,
-        vec![packet_header.m_session_time; len_car_telemetry],
+        vec![packet_header.m_session_time; number_of_cars],
         None,
         None,
     );
@@ -103,28 +91,28 @@ pub fn write(
         None,
         None,
     );
-    write_int32_column(&mut row_group_writer, car_status_index, None, None);
-    write_float_column(&mut row_group_writer, m_fuel_in_tank_vec, None, None);
-    write_float_column(&mut row_group_writer, m_fuel_capacity_vec, None, None);
+    write_int32_column(&mut row_group_writer, car_index, None, None);
+    write_float_column(&mut row_group_writer, m_fuel_in_tank, None, None);
+    write_float_column(&mut row_group_writer, m_fuel_capacity, None, None);
     write_float_column(&mut row_group_writer, m_fuel_remaining_laps, None, None);
-    write_int32_column(&mut row_group_writer, m_actual_tyre_compund_vec, None, None);
-    write_int32_column(&mut row_group_writer, m_tyres_age_laps_vec, None, None);
-    write_float_column(&mut row_group_writer, m_ers_store_energy_vec, None, None);
+    write_int32_column(&mut row_group_writer, m_actual_tyre_compund, None, None);
+    write_int32_column(&mut row_group_writer, m_tyres_age_laps, None, None);
+    write_float_column(&mut row_group_writer, m_ers_store_energy, None, None);
     write_float_column(
         &mut row_group_writer,
-        m_ers_harvested_this_lap_mguk_vec,
+        m_ers_harvested_this_lap_mguk,
         None,
         None,
     );
     write_float_column(
         &mut row_group_writer,
-        m_ers_harvested_this_lap_mguh_vec,
+        m_ers_harvested_this_lap_mguh,
         None,
         None,
     );
     write_float_column(
         &mut row_group_writer,
-        m_ers_deployed_this_lap_vec,
+        m_ers_deployed_this_lap,
         None,
         None,
     );
