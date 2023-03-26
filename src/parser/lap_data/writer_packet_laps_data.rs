@@ -2,7 +2,7 @@ use crate::parser::utils::util_column_writer::{
     write_bool_column, write_float_column, write_int32_column, write_u64_as_bytearray_column, write_int64_column
 };
 use crate::parser::utils::packet_header::PacketHeader;
-use crate::parser::lap_data::packet_lap_data::PacketLapData;
+use crate::parser::lap_data::struct_lap_data::PacketLapData;
 use binrw::BinRead;
 use parquet::{
     file::{properties::WriterProperties, writer::SerializedFileWriter},
