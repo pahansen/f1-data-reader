@@ -1,24 +1,32 @@
 mod recorder {
     pub mod udp_recorder;
 }
-mod structs {
-    pub mod packet_car_status_data;
-    pub mod packet_car_telemetry_data;
-    pub mod packet_header;
-    pub mod packet_lap_data;
-    pub mod packet_participants_data;
-    pub mod parser;
-}
-mod parquet_writers {
-    pub mod util_column_writer;
-    pub mod writer_packet_car_status_data;
-    pub mod writer_packet_car_telemetry_data;
-    pub mod writer_packet_laps_data;
-    pub mod writer_packet_participants_data;
+mod parser {
+    mod car_status_data {
+        pub mod packet_car_status_data;
+        pub mod writer_packet_car_status_data;
+    }
+    mod car_telemetry_data {
+        pub mod writer_packet_car_telemetry_data;
+        pub mod packet_car_telemetry_data;
+    }
+    mod lap_data {
+        pub mod writer_packet_laps_data;
+        pub mod packet_lap_data;
+    }
+    mod participants_data {
+        pub mod writer_packet_participants_data;
+        pub mod packet_participants_data;
+    }
+    mod utils {
+        pub mod packet_header;
+        pub mod util_column_writer;
+    }
+    pub mod parquet_parser;
 }
 use clap::{Parser, Subcommand};
 use recorder::udp_recorder;
-use structs::parser;
+use parser::parquet_parser;
 
 #[derive(Subcommand, Debug)]
 enum Mode {
@@ -60,7 +68,7 @@ fn main() -> std::io::Result<()> {
         } => {
             println!("Writing f1 log to parquet...");
             let parquet_folder_path = parquet_folder_path;
-            parser::parse_recorded_file(f1_log_file_path, parquet_folder_path).unwrap();
+            parquet_parser::parse_recorded_file(f1_log_file_path, parquet_folder_path).unwrap();
         }
     }
     Ok(())

@@ -1,8 +1,8 @@
-use crate::parquet_writers::util_column_writer::{
-    write_bool_column, write_float_column, write_int32_column, write_u64_as_bytearray_column,
+use crate::parser::utils::util_column_writer::{
+    write_bool_column, write_float_column, write_int32_column, write_u64_as_bytearray_column
 };
-use crate::structs::packet_car_telemetry_data::PacketCarTelemetryData;
-use crate::structs::packet_header::PacketHeader;
+use crate::parser::utils::packet_header::PacketHeader;
+use crate::parser::car_telemetry_data::packet_car_telemetry_data::PacketCarTelemetryData;
 use binrw::BinRead;
 use parquet::{
     file::{properties::WriterProperties, writer::SerializedFileWriter},
