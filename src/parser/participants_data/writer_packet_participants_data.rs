@@ -1,8 +1,9 @@
-use crate::parser::utils::util_column_writer::{
-    write_bool_column, write_float_column, write_int32_column, write_u64_as_bytearray_column, write_string_as_bytearray_column
-};
-use crate::parser::utils::packet_header::PacketHeader;
 use crate::parser::participants_data::struct_participants_data::PacketParticipantsData;
+use crate::parser::utils::packet_header::PacketHeader;
+use crate::parser::utils::util_column_writer::{
+    write_bool_column, write_float_column, write_int32_column, write_string_as_bytearray_column,
+    write_u64_as_bytearray_column,
+};
 use binrw::BinRead;
 use parquet::{
     file::{properties::WriterProperties, writer::SerializedFileWriter},
@@ -45,7 +46,7 @@ pub fn write(
     }
     let mut is_secondary_player_car_vec: Vec<bool> = vec![false; len_participants];
     if usize::from(packet_header.m_secondary_player_car_index) < len_participants {
-        is_secondary_player_car_vec[usize::from(packet_header.m_player_car_index)] = true;
+        is_secondary_player_car_vec[usize::from(packet_header.m_secondary_player_car_index)] = true;
     }
     let participant_index: Vec<i32> = (0..22).collect();
     let mut m_name_vec: Vec<String> = Vec::new();
@@ -60,28 +61,19 @@ pub fn write(
     write_int32_column(
         &mut row_group_writer,
         vec![i32::from(packet_header.m_packet_format); len_participants],
-        None,
-        None,
     );
     write_u64_as_bytearray_column(
         &mut row_group_writer,
         vec![packet_header.m_session_uid; len_participants],
-        None,
-        None,
     );
     write_float_column(
         &mut row_group_writer,
         vec![packet_header.m_session_time; len_participants],
     );
-    write_bool_column(&mut row_group_writer, is_player_car_vec, None, None);
-    write_bool_column(
-        &mut row_group_writer,
-        is_secondary_player_car_vec,
-        None,
-        None,
-    );
-    write_int32_column(&mut row_group_writer, participant_index, None, None);
-    write_string_as_bytearray_column(&mut row_group_writer, m_name_vec, None, None);
+    write_bool_column(&mut row_group_writer, is_player_car_vec);
+    write_bool_column(&mut row_group_writer, is_secondary_player_car_vec);
+    write_int32_column(&mut row_group_writer, participant_index);
+    write_string_as_bytearray_column(&mut row_group_writer, m_name_vec);
 
     row_group_writer.close().unwrap();
 

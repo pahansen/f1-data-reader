@@ -7,16 +7,16 @@ mod parser {
         pub mod writer_packet_car_status_data;
     }
     mod car_telemetry_data {
-        pub mod writer_packet_car_telemetry_data;
         pub mod struct_car_telemetry_data;
+        pub mod writer_packet_car_telemetry_data;
     }
     mod lap_data {
-        pub mod writer_packet_laps_data;
         pub mod struct_lap_data;
+        pub mod writer_packet_laps_data;
     }
     mod participants_data {
-        pub mod writer_packet_participants_data;
         pub mod struct_participants_data;
+        pub mod writer_packet_participants_data;
     }
     mod utils {
         pub mod packet_header;
@@ -25,8 +25,8 @@ mod parser {
     pub mod parquet_parser;
 }
 use clap::{Parser, Subcommand};
-use recorder::udp_recorder;
 use parser::parquet_parser;
+use recorder::udp_recorder;
 
 #[derive(Subcommand, Debug)]
 enum Mode {

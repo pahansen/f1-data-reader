@@ -1,8 +1,9 @@
-use crate::parser::utils::util_column_writer::{
-    write_bool_column, write_float_column, write_int32_column, write_u64_as_bytearray_column, write_int64_column
-};
-use crate::parser::utils::packet_header::PacketHeader;
 use crate::parser::lap_data::struct_lap_data::PacketLapData;
+use crate::parser::utils::packet_header::PacketHeader;
+use crate::parser::utils::util_column_writer::{
+    write_bool_column, write_float_column, write_int32_column, write_int64_column,
+    write_u64_as_bytearray_column,
+};
 use binrw::BinRead;
 use parquet::{
     file::{properties::WriterProperties, writer::SerializedFileWriter},
@@ -49,7 +50,7 @@ pub fn write(
     }
     let mut is_secondary_player_car_vec: Vec<bool> = vec![false; len_lap];
     if usize::from(packet_header.m_secondary_player_car_index) < len_lap {
-        is_secondary_player_car_vec[usize::from(packet_header.m_player_car_index)] = true;
+        is_secondary_player_car_vec[usize::from(packet_header.m_secondary_player_car_index)] = true;
     }
     let lap_index: Vec<i32> = (0..22).collect();
     let mut m_last_lap_time_in_ms_vec = Vec::new();
@@ -72,38 +73,24 @@ pub fn write(
     write_int32_column(
         &mut row_group_writer,
         vec![i32::from(packet_header.m_packet_format); len_lap],
-        None,
-        None,
     );
     write_u64_as_bytearray_column(
         &mut row_group_writer,
         vec![packet_header.m_session_uid; len_lap],
-        None,
-        None,
     );
     write_float_column(
         &mut row_group_writer,
         vec![packet_header.m_session_time; len_lap],
     );
-    write_bool_column(&mut row_group_writer, is_player_car_vec, None, None);
-    write_bool_column(
-        &mut row_group_writer,
-        is_secondary_player_car_vec,
-        None,
-        None,
-    );
-    write_int32_column(&mut row_group_writer, lap_index, None, None);
-    write_int64_column(&mut row_group_writer, m_last_lap_time_in_ms_vec, None, None);
-    write_int64_column(
-        &mut row_group_writer,
-        m_current_lap_time_in_ms_vec,
-        None,
-        None,
-    );
-    write_int32_column(&mut row_group_writer, m_sector1_time_in_ms_vec, None, None);
-    write_int32_column(&mut row_group_writer, m_sector2_time_in_ms_vec, None, None);
-    write_float_column(&mut row_group_writer, m_lap_distance_vec,);
-    write_int32_column(&mut row_group_writer, m_current_lap_num_vec, None, None);
+    write_bool_column(&mut row_group_writer, is_player_car_vec);
+    write_bool_column(&mut row_group_writer, is_secondary_player_car_vec);
+    write_int32_column(&mut row_group_writer, lap_index);
+    write_int64_column(&mut row_group_writer, m_last_lap_time_in_ms_vec);
+    write_int64_column(&mut row_group_writer, m_current_lap_time_in_ms_vec);
+    write_int32_column(&mut row_group_writer, m_sector1_time_in_ms_vec);
+    write_int32_column(&mut row_group_writer, m_sector2_time_in_ms_vec);
+    write_float_column(&mut row_group_writer, m_lap_distance_vec);
+    write_int32_column(&mut row_group_writer, m_current_lap_num_vec);
 
     row_group_writer.close().unwrap();
 

@@ -1,5 +1,9 @@
-use crate::parser::{car_status_data::writer_packet_car_status_data, car_telemetry_data::writer_packet_car_telemetry_data, lap_data::writer_packet_laps_data, participants_data::writer_packet_participants_data};
 use crate::parser::utils::packet_header::PacketHeader;
+use crate::parser::{
+    car_status_data::writer_packet_car_status_data,
+    car_telemetry_data::writer_packet_car_telemetry_data, lap_data::writer_packet_laps_data,
+    participants_data::writer_packet_participants_data,
+};
 use binrw::BinRead;
 use std::io::Seek;
 use std::{fs::File, path::Path};

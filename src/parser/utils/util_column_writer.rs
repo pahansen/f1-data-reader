@@ -17,13 +17,11 @@ pub fn write_float_column(
 pub fn write_int32_column(
     row_group_writer: &mut parquet::file::writer::SerializedRowGroupWriter<File>,
     column_data_vec: Vec<i32>,
-    def_levels: Option<&[i16]>,
-    rep_levels: Option<&[i16]>,
 ) {
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
             .typed::<Int32Type>()
-            .write_batch(&column_data_vec, def_levels, rep_levels)
+            .write_batch(&column_data_vec, None, None)
             .unwrap();
         col_writer.close().unwrap()
     }
@@ -32,13 +30,11 @@ pub fn write_int32_column(
 pub fn write_int64_column(
     row_group_writer: &mut parquet::file::writer::SerializedRowGroupWriter<File>,
     column_data_vec: Vec<i64>,
-    def_levels: Option<&[i16]>,
-    rep_levels: Option<&[i16]>,
 ) {
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
             .typed::<Int64Type>()
-            .write_batch(&column_data_vec, def_levels, rep_levels)
+            .write_batch(&column_data_vec, None, None)
             .unwrap();
         col_writer.close().unwrap()
     }
@@ -47,8 +43,6 @@ pub fn write_int64_column(
 pub fn write_u64_as_bytearray_column(
     row_group_writer: &mut parquet::file::writer::SerializedRowGroupWriter<File>,
     column_data_vec: Vec<u64>,
-    def_levels: Option<&[i16]>,
-    rep_levels: Option<&[i16]>,
 ) {
     let mut u64_byte_array_vec = Vec::new();
     for value in column_data_vec {
@@ -60,7 +54,7 @@ pub fn write_u64_as_bytearray_column(
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
             .typed::<ByteArrayType>()
-            .write_batch(&u64_byte_array_vec, def_levels, rep_levels)
+            .write_batch(&u64_byte_array_vec, None, None)
             .unwrap();
         col_writer.close().unwrap()
     }
@@ -69,8 +63,6 @@ pub fn write_u64_as_bytearray_column(
 pub fn write_string_as_bytearray_column(
     row_group_writer: &mut parquet::file::writer::SerializedRowGroupWriter<File>,
     column_data_vec: Vec<String>,
-    def_levels: Option<&[i16]>,
-    rep_levels: Option<&[i16]>,
 ) {
     let mut string_byte_array_vec = Vec::new();
     for value in column_data_vec {
@@ -82,7 +74,7 @@ pub fn write_string_as_bytearray_column(
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
             .typed::<ByteArrayType>()
-            .write_batch(&string_byte_array_vec, def_levels, rep_levels)
+            .write_batch(&string_byte_array_vec, None, None)
             .unwrap();
         col_writer.close().unwrap()
     }
@@ -91,13 +83,11 @@ pub fn write_string_as_bytearray_column(
 pub fn write_bool_column(
     row_group_writer: &mut parquet::file::writer::SerializedRowGroupWriter<File>,
     column_data_vec: Vec<bool>,
-    def_levels: Option<&[i16]>,
-    rep_levels: Option<&[i16]>,
 ) {
     if let Some(mut col_writer) = row_group_writer.next_column().unwrap() {
         col_writer
             .typed::<BoolType>()
-            .write_batch(&column_data_vec, def_levels, rep_levels)
+            .write_batch(&column_data_vec, None, None)
             .unwrap();
         col_writer.close().unwrap()
     }
