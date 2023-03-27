@@ -22,7 +22,7 @@ pub fn new(file_path: &Path) -> SerializedFileWriter<File> {
         REQUIRED FLOAT m_session_time;
         REQUIRED BOOLEAN is_player_car;
         REQUIRED BOOLEAN is_secondary_player_car;
-        REQUIRED INT32 lap_index;
+        REQUIRED INT32 car_index;
         REQUIRED INT64 m_last_lap_time_in_ms;
         REQUIRED INT64 m_current_lap_time_in_ms;
         REQUIRED INT32 m_sector1_time_in_ms;
@@ -43,54 +43,74 @@ pub fn write(
     writer: &mut SerializedFileWriter<File>,
 ) -> u64 {
     let message = PacketLapData::read(&mut file).unwrap();
-    let len_lap = message.m_lap_data.len();
-    let mut is_player_car_vec: Vec<bool> = vec![false; len_lap];
-    if usize::from(packet_header.m_player_car_index) < len_lap {
+    let number_of_cars = message.m_lap_data.len();
+    let mut is_player_car_vec: Vec<bool> = vec![false; number_of_cars];
+    if usize::from(packet_header.m_player_car_index) < number_of_cars {
         is_player_car_vec[usize::from(packet_header.m_player_car_index)] = true;
     }
-    let mut is_secondary_player_car_vec: Vec<bool> = vec![false; len_lap];
-    if usize::from(packet_header.m_secondary_player_car_index) < len_lap {
+    let mut is_secondary_player_car_vec: Vec<bool> = vec![false; number_of_cars];
+    if usize::from(packet_header.m_secondary_player_car_index) < number_of_cars {
         is_secondary_player_car_vec[usize::from(packet_header.m_secondary_player_car_index)] = true;
     }
-    let lap_index: Vec<i32> = (0..22).collect();
-    let mut m_last_lap_time_in_ms_vec = Vec::new();
-    let mut m_current_lap_time_in_ms_vec = Vec::new();
-    let mut m_sector1_time_in_ms_vec = Vec::new();
-    let mut m_sector2_time_in_ms_vec = Vec::new();
-    let mut m_lap_distance_vec = Vec::new();
-    let mut m_current_lap_num_vec = Vec::new();
+    let car_index: Vec<i32> = (0..22).collect();
+    let m_last_lap_time_in_ms = message
+        .m_lap_data
+        .iter()
+        .map(|c| i64::from(c.m_last_lap_time_in_ms))
+        .collect::<Vec<i64>>();
 
-    for lap in message.m_lap_data {
-        m_last_lap_time_in_ms_vec.push(i64::from(lap.m_last_lap_time_in_ms));
-        m_current_lap_time_in_ms_vec.push(i64::from(lap.m_current_lap_time_in_ms));
-        m_sector1_time_in_ms_vec.push(i32::from(lap.m_sector1_time_in_ms));
-        m_sector2_time_in_ms_vec.push(i32::from(lap.m_sector2_time_in_ms));
-        m_lap_distance_vec.push(lap.m_lap_distance);
-        m_current_lap_num_vec.push(i32::from(lap.m_current_lap_num));
-    }
+    let m_current_lap_time_in_ms = message
+        .m_lap_data
+        .iter()
+        .map(|c| i64::from(c.m_current_lap_time_in_ms))
+        .collect::<Vec<i64>>();
+
+    let m_sector1_time_in_ms = message
+        .m_lap_data
+        .iter()
+        .map(|c| i32::from(c.m_sector1_time_in_ms))
+        .collect::<Vec<i32>>();
+
+    let m_sector2_time_in_ms = message
+        .m_lap_data
+        .iter()
+        .map(|c| i32::from(c.m_sector2_time_in_ms))
+        .collect::<Vec<i32>>();
+
+    let m_lap_distance = message
+        .m_lap_data
+        .iter()
+        .map(|c| c.m_lap_distance)
+        .collect::<Vec<f32>>();
+
+    let m_current_lap_num = message
+        .m_lap_data
+        .iter()
+        .map(|c| i32::from(c.m_current_lap_num))
+        .collect::<Vec<i32>>();
 
     let mut row_group_writer = writer.next_row_group().unwrap();
     write_int32_column(
         &mut row_group_writer,
-        vec![i32::from(packet_header.m_packet_format); len_lap],
+        vec![i32::from(packet_header.m_packet_format); number_of_cars],
     );
     write_u64_as_bytearray_column(
         &mut row_group_writer,
-        vec![packet_header.m_session_uid; len_lap],
+        vec![packet_header.m_session_uid; number_of_cars],
     );
     write_float_column(
         &mut row_group_writer,
-        vec![packet_header.m_session_time; len_lap],
+        vec![packet_header.m_session_time; number_of_cars],
     );
     write_bool_column(&mut row_group_writer, is_player_car_vec);
     write_bool_column(&mut row_group_writer, is_secondary_player_car_vec);
-    write_int32_column(&mut row_group_writer, lap_index);
-    write_int64_column(&mut row_group_writer, m_last_lap_time_in_ms_vec);
-    write_int64_column(&mut row_group_writer, m_current_lap_time_in_ms_vec);
-    write_int32_column(&mut row_group_writer, m_sector1_time_in_ms_vec);
-    write_int32_column(&mut row_group_writer, m_sector2_time_in_ms_vec);
-    write_float_column(&mut row_group_writer, m_lap_distance_vec);
-    write_int32_column(&mut row_group_writer, m_current_lap_num_vec);
+    write_int32_column(&mut row_group_writer, car_index);
+    write_int64_column(&mut row_group_writer, m_last_lap_time_in_ms);
+    write_int64_column(&mut row_group_writer, m_current_lap_time_in_ms);
+    write_int32_column(&mut row_group_writer, m_sector1_time_in_ms);
+    write_int32_column(&mut row_group_writer, m_sector2_time_in_ms);
+    write_float_column(&mut row_group_writer, m_lap_distance);
+    write_int32_column(&mut row_group_writer, m_current_lap_num);
 
     row_group_writer.close().unwrap();
 
