@@ -3,6 +3,7 @@ use crate::parser::{
     car_status_data::writer_packet_car_status_data,
     car_telemetry_data::writer_packet_car_telemetry_data, lap_data::writer_packet_laps_data,
     participants_data::writer_packet_participants_data,
+    motion_data::writer_packet_car_motion_data
 };
 use binrw::BinRead;
 use std::io::Seek;
@@ -27,16 +28,22 @@ pub fn parse_recorded_file(f1_log_path: &str, parquet_folder_path: &str) -> std:
     let folder_path: String = parquet_folder_path.to_owned();
     let car_status_file = folder_path + "/car_status.parquet";
     let car_status_path = Path::new(&car_status_file);
+    // Car Motion Data
+    let folder_path: String = parquet_folder_path.to_owned();
+    let car_motion_file = folder_path + "/car_motion.parquet";
+    let car_motion_path = Path::new(&car_motion_file);
 
     let mut car_telemetry_writer = writer_packet_car_telemetry_data::new(car_telemetry_path);
     let mut participants_writer = writer_packet_participants_data::new(participants_path);
     let mut laps_writer = writer_packet_laps_data::new(laps_path);
     let mut car_status_writer = writer_packet_car_status_data::new(car_status_path);
+    let mut car_motion_writer = writer_packet_car_motion_data::new(car_motion_path);
 
     while let Ok(message) = PacketHeader::read(&mut f1_log) {
         // Skip messages that are not implemented
         match message.m_packet_id {
-            0 => f1_log.seek(std::io::SeekFrom::Current(1440))?,
+            //0 => f1_log.seek(std::io::SeekFrom::Current(1440))?,
+            0 => writer_packet_car_motion_data::write(&message, &f1_log, &mut car_motion_writer),
             1 => f1_log.seek(std::io::SeekFrom::Current(608))?,
             2 => writer_packet_laps_data::write(&message, &f1_log, &mut laps_writer),
             //2 => f1_log.seek(std::io::SeekFrom::Current(948))?,
