@@ -14,6 +14,9 @@ mod parser {
         pub mod struct_lap_data;
         pub mod writer_packet_laps_data;
     }
+    mod motion_data {
+        pub mod struct_motion_data;
+    }
     mod participants_data {
         pub mod struct_participants_data;
         pub mod writer_packet_participants_data;
