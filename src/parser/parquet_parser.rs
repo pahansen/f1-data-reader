@@ -2,8 +2,7 @@ use crate::parser::utils::packet_header::PacketHeader;
 use crate::parser::{
     car_status_data::writer_packet_car_status_data,
     car_telemetry_data::writer_packet_car_telemetry_data, lap_data::writer_packet_laps_data,
-    participants_data::writer_packet_participants_data,
-    motion_data::writer_packet_car_motion_data
+    motion_data::writer_packet_car_motion_data, participants_data::writer_packet_participants_data,
 };
 use binrw::BinRead;
 use std::io::Seek;
@@ -73,5 +72,6 @@ pub fn parse_recorded_file(f1_log_path: &str, parquet_folder_path: &str) -> std:
     participants_writer.close().unwrap();
     laps_writer.close().unwrap();
     car_status_writer.close().unwrap();
+    car_motion_writer.close().unwrap();
     Ok(())
 }
