@@ -3,8 +3,8 @@ use binrw::BinRead;
 #[derive(Debug, BinRead)]
 #[br(little)]
 pub struct LapData {
-    pub m_current_lap_time_in_ms: u32, // Current time around the lap in milliseconds
     pub m_last_lap_time_in_ms: u32,    // Last lap time in milliseconds
+    pub m_current_lap_time_in_ms: u32, // Current time around the lap in milliseconds
     pub m_sector1_time_in_ms: i16,     // Sector 1 time in milliseconds
     pub m_sector2_time_in_ms: i16,     // Sector 2 time in milliseconds
     pub m_lap_distance: f32,           // Distance vehicle is around current lap in metres – could
